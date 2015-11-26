@@ -89,7 +89,7 @@ if __name__ == '__main__':
         'size', 
         type=int, 
         nargs='?',
-        help='approximate number of words in generated text'
+        help='number of words in generated text'
     )
     parser.add_argument(
         '--database', 

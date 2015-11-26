@@ -42,7 +42,6 @@ class TextGenerator:
             if None not in (first, second):
                 self.triple_distribution[first, second][third] += 1
             first, second = second, third
-        self.distributions_updated = True
 
     def _generate_words(self, word_count):
         first_generator = WordGenerator(self.first_distribution)

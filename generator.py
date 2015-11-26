@@ -97,9 +97,9 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--database',
-        default='distribution.db',
+        default='statistic.db',
         metavar='FILENAME',
-        help='distribution database filename'
+        help='statistic database filename'
     )
     args = parser.parse_args()
     generator = TextGenerator(args.database)

@@ -1,8 +1,10 @@
-import re, pickle
+import re
+import pickle
 from bisect import bisect
 from random import randrange
 from collections import defaultdict, Counter
 from os.path import isfile
+
 
 class WordGenerator:
 
@@ -20,17 +22,18 @@ class WordGenerator:
         index = bisect(self.breakpoints, randrange(self.total_count))
         return self.words[index]
 
+
 class TextGenerator:
 
     def __init__(self, filename):
         self.filename = filename
         if isfile(self.filename):
             with open(self.filename, 'rb') as f:
-                self.first_distribution = pickle.load(f)
-                self.triple_distribution = pickle.load(f)
+                self.first_statistic = pickle.load(f)
+                self.triple_statistic = pickle.load(f)
         else:
-            self.first_distribution = Counter()
-            self.triple_distribution = defaultdict(Counter)
+            self.first_statistic = Counter()
+            self.triple_statistic = defaultdict(Counter)
 
     def update(self, text):
         first, second = None, '.'
@@ -38,16 +41,16 @@ class TextGenerator:
         for match in pattern.finditer(text):
             third = match.group().lower()
             if '.' == second:
-                self.first_distribution[third] += 1
+                self.first_statistic[third] += 1
             if None not in (first, second):
-                self.triple_distribution[first, second][third] += 1
+                self.triple_statistic[first, second][third] += 1
             first, second = second, third
 
     def _generate_words(self, word_count):
-        first_generator = WordGenerator(self.first_distribution)
+        first_generator = WordGenerator(self.first_statistic)
         triple_generator = {
-            prefix: WordGenerator(distribution) 
-            for prefix, distribution in self.triple_distribution.items()
+            prefix: WordGenerator(distribution)
+            for prefix, distribution in self.triple_statistic.items()
         }
         first, second = '.', first_generator.generate()
         result = [second.title()]
@@ -78,23 +81,24 @@ class TextGenerator:
 
     def save(self):
         with open(self.filename, 'wb') as f:
-            pickle.dump(self.first_distribution, f)
-            pickle.dump(self.triple_distribution, f)
+            pickle.dump(self.first_statistic, f)
+            pickle.dump(self.triple_statistic, f)
+
 
 if __name__ == '__main__':
     from sys import stdin
     from argparse import ArgumentParser
     parser = ArgumentParser(description='Markov chain text generator')
     parser.add_argument(
-        'size', 
-        type=int, 
+        'size',
+        type=int,
         nargs='?',
         help='number of words in generated text'
     )
     parser.add_argument(
-        '--database', 
-        default='distribution.db', 
-        metavar='FILENAME', 
+        '--database',
+        default='distribution.db',
+        metavar='FILENAME',
         help='distribution database filename'
     )
     args = parser.parse_args()

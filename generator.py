@@ -35,7 +35,7 @@ class TextGenerator:
             self.first_statistic = Counter()
             self.triple_statistic = defaultdict(Counter)
 
-    def update(self, text):
+    def learn(self, text):
         first, second = None, '.'
         pattern = re.compile("[a-zA-Z]+|[,.!?]")
         for match in pattern.finditer(text):
@@ -65,12 +65,12 @@ class TextGenerator:
             first, second = second, third
         return result
 
-    def generate(self, word_count):
+    def generate(self, word_count, max_line_length=100):
         lines = []
         start_index, line_length = 0, 0
         words = self._generate_words(word_count)
         for index, word in enumerate(words):
-            if line_length + len(word) > 100:
+            if line_length + len(word) > max_line_length:
                 line = ' '.join(words[start_index:index])
                 lines.append(line)
                 start_index, line_length = index, 0
@@ -88,6 +88,7 @@ class TextGenerator:
 if __name__ == '__main__':
     from sys import stdin
     from argparse import ArgumentParser
+
     parser = ArgumentParser(description='Markov chain text generator')
     parser.add_argument(
         'size',
@@ -108,5 +109,5 @@ if __name__ == '__main__':
         print(text)
     else:
         text = stdin.read()
-        generator.update(text)
+        generator.learn(text)
     generator.save()
